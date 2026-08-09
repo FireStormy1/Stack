@@ -8,7 +8,7 @@ Time your moves, stack the blocks, and build as high as you can. The better your
 
 ## 🚀 Live Demo
 
-👉 ****
+👉 **https://stack-liard.vercel.app/**
 
 ---
 
