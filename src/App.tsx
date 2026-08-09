@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { BLOCK_COLORS, BLOCK_HEIGHT, type GameMode, type StackBlock, isPerfect, pointsForScore, speedForScore, streakBonus } from './game/engine';
 import { sound } from './game/audio';
+import { music } from './game/music';
 import './index.css';
 
 type View = 'home' | 'about' | 'rules' | 'developer';
@@ -323,6 +324,7 @@ function GameCanvas({ status, mode, muted, onPause, onScore, onPerfect, onMilest
 
   useEffect(() => {
     sound.setMuted(muted);
+    try { music.setMuted(muted); } catch {}
   }, [muted]);
 
   useEffect(() => {
@@ -365,12 +367,14 @@ function GameView({ mode, muted, setMuted, onExit, onRestart, best, setBest }: {
 
   const pause = useCallback(() => {
     setStatus((current) => {
-      if (current === 'playing') {
+        if (current === 'playing') {
         sound.pauseMusic();
+        try { music.pause(); } catch {}
         return 'paused';
       }
       if (current === 'paused') {
         sound.resumeMusic();
+        try { music.resume(); } catch {}
         return 'playing';
       }
       return current;
@@ -386,6 +390,7 @@ function GameView({ mode, muted, setMuted, onExit, onRestart, best, setBest }: {
       try { localStorage.setItem(BEST_KEY, String(finalScore)); } catch { /* storage can be unavailable */ }
     }
     setScore(finalScore);
+    try { music.stop(); } catch {}
     sound.stopMusic();
     setStatus('gameover');
   }, [best, setBest]);
@@ -399,10 +404,9 @@ function GameView({ mode, muted, setMuted, onExit, onRestart, best, setBest }: {
     sound.play('ui');
   };
 
-  useEffect(() => {
-    sound.startMusic(mode);
-    return () => sound.stopMusic();
-  }, [mode]);
+  // Background music is managed by the HTMLAudio-based music manager.
+  // Start/stop is controlled from the app lifecycle (start/restart/exit) to ensure
+  // playback happens in response to user interaction and does not create duplicates.
 
   return (
     <div className="game-screen">
@@ -440,11 +444,12 @@ function App() {
   const setMuted = (next: boolean) => {
     setMutedState(next);
     sound.setMuted(next);
+    try { music.setMuted(next); } catch {}
     try { localStorage.setItem(MUTE_KEY, String(next)); } catch { /* storage can be unavailable */ }
   };
-  const startGame = () => { sound.play('ui'); setIsPlaying(true); };
-  const exitGame = () => { setIsPlaying(false); setView('home'); };
-  const restart = () => { setRunKey((key) => key + 1); };
+  const startGame = () => { sound.play('ui'); try { music.start(mode); } catch {} setIsPlaying(true); };
+  const exitGame = () => { try { music.stop(); } catch {} setIsPlaying(false); setView('home'); };
+  const restart = () => { try { music.start(mode); } catch {} setRunKey((key) => key + 1); };
 
   if (isPlaying) return <GameView key={runKey} mode={mode} muted={muted} setMuted={setMuted} onExit={exitGame} onRestart={restart} best={best} setBest={setBest} />;
   if (view !== 'home') return <div className="stack-app"><div className="scene-sun" /><InfoView kind={view} onBack={() => setView('home')} /></div>;
