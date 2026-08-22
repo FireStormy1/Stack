@@ -322,7 +322,7 @@ Possible future additions include:
 B.Tech CSE student passionate about software development, problem solving, and building interactive web experiences.
 
 **GitHub:**
-👉 [FireStormy1](https://github.com/FireStormy1)
+👉 [FireStormy1](https://github.com/saswatdixit)
 
 **LinkedIn:**
 👉 [Saswat Dixit](https://www.linkedin.com/in/saswatdixit/)
